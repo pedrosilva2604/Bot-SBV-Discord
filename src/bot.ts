@@ -5,7 +5,6 @@ import {
   Invite,
   Guild,
   GuildMember,
-  Collection,
 } from "discord.js";
 import { MemberJoinedDto, ResponseDto } from "./DTO/DTOs-bot";
 import axios from "axios";
@@ -50,7 +49,11 @@ export class InviteCache implements IInviteCache {
     return this.cache.get(guildId) || new Map<string, number>();
   }
 
-  async addInvite(guildId: string, code: string, uses: number): Promise<ResponseDto> {
+  async addInvite(
+    guildId: string,
+    code: string,
+    uses: number,
+  ): Promise<ResponseDto> {
     try {
       const guildCache = this.get(guildId);
       guildCache.set(code, uses);
@@ -67,9 +70,15 @@ export class InviteCache implements IInviteCache {
       const guildMap = new Map<string, number>();
       invites.forEach((inv) => guildMap.set(inv.code, inv.uses ?? 0));
       this.cache.set(guild.id, guildMap);
-      return { statusCode: 200, message: `Cache atualizado para ${guild.name}` };
+      return {
+        statusCode: 200,
+        message: `Cache atualizado para ${guild.name}`,
+      };
     } catch (error: any) {
-      console.error(`Erro ao buscar invites na guilda ${guild.id}:`, error.message);
+      console.error(
+        `Erro ao buscar invites na guilda ${guild.id}:`,
+        error.message,
+      );
       return { statusCode: 500, message: error.message };
     }
   }
@@ -80,10 +89,12 @@ export class WebhookService implements IWebhookService {
 
   async send(data: MemberJoinedDto): Promise<ResponseDto> {
     try {
-      await axios.post(this.webhookUrl, data);
-      return { statusCode: 200, message: "Webhook enviado" };
+      const response = await axios.post(this.webhookUrl, data);
+      return {
+        statusCode: response.status,
+        message: response.data.message ?? "Webhook enviado com sucesso",
+      };
     } catch (error: any) {
-      console.error("Erro Webhook:", error.message);
       return { statusCode: 500, message: error.message };
     }
   }
@@ -105,11 +116,11 @@ export class BotService implements IBotService {
 
   async handleMemberJoin(member: GuildMember): Promise<MemberJoinedDto> {
     const { guild } = member;
-    
+
     // 1. Buscamos o estado ATUAL da API e o que tínhamos no CACHE
     const currentInvites = await guild.invites.fetch();
     const cachedInvites = this.inviteCache.get(guild.id);
-    
+
     let usedInviteCode = "unknown";
 
     // --- LÓGICA PARA CONVITES ÚNICOS (QUE SOMEM) ---
@@ -146,9 +157,15 @@ export class BotService implements IBotService {
       role_id: member.roles.highest.id,
     };
 
-    console.log(`Usuário ${member.user.username} entrou com o código: ${usedInviteCode}`);
+    console.log(
+      `Usuário ${member.user.username} entrou com o código: ${usedInviteCode}`,
+    );
 
-    await this.webhookService.send(payload);
+    const response = await this.webhookService.send(payload);
+    console.log(
+      `[${response.statusCode}] ${response.message} — ${member.user.username}`,
+    );
+
     return payload;
   }
 }
