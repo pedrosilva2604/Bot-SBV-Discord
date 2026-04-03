@@ -1,33 +1,20 @@
 {
   "name": "bot-sbv-discord",
   "version": "1.0.0",
-  "description": "",
   "main": "dist/bot.js",
   "scripts": {
     "dev": "ts-node src/bot.ts",
     "build": "npx tsc",
     "start": "node dist/bot.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/pedrosilva2604/Bot-SBV-Discord.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/pedrosilva2604/Bot-SBV-Discord/issues"
-  },
-  "homepage": "https://github.com/pedrosilva2604/Bot-SBV-Discord#readme",
   "dependencies": {
     "axios": "^1.14.0",
-    "discord.js": "^14.26.0",
-    "dotenv": "^17.4.0"
+    "discord.js": "^14.18.0",
+    "dotenv": "^16.5.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.0.0"
+    "@types/node": "^20.0.0"
   }
 }
